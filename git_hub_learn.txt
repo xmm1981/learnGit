@@ -1,0 +1,243 @@
+====================================================================================================
+撤销修改
+场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
+场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，
+第一步用命令git reset HEAD file，就回到了场景1，第二步按场景1操作。
+场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
+====================================================================================================
+$ git log --pretty=oneline
+3628164fb26d48395383f8f31179f24e0882e1e0 append GPL
+ea34578d5496d7dd233c827ed32a8cd576c5ee85 add distributed
+cb926e7ea50ad11b8f9e909c05226233bf755030 wrote a readme file
+
+$ git reset --hard HEAD^
+HEAD is now at ea34578 add distributed
+
+$ git reset --hard 3628164
+HEAD is now at 3628164 append GPL
+====================================================================================================
+$ git log
+commit ea34578d5496d7dd233c827ed32a8cd576c5ee85
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Tue Aug 20 14:53:12 2013 +0800
+
+    add distributed
+
+commit cb926e7ea50ad11b8f9e909c05226233bf755030
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Mon Aug 19 17:51:55 2013 +0800
+
+    wrote a readme file
+====================================================================================================
+远程仓库
+第1步：创建SSH Key。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下
+有没有id_rsa和id_rsa.pub这两个文件，如果已经有了，可直接跳到下一步。
+如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：
+$ ssh-keygen -t rsa -C "22929289@qq.com"
+$ git clone git@github.com:xmm1981/learnGit.git
+你需要把邮件地址换成你自己的邮件地址，然后一路回车，使用默认值即可，由于这个Key也不是用于军事目的，
+所以也无需设置密码。
+如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，
+id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+
+第2步：登陆GitHub，打开“Account settings”，“SSH Keys”页面：
+然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
+
+在Repository name填入learngit，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
+目前，在GitHub上的这个learngit仓库还是空的，GitHub告诉我们，可以从这个仓库克隆出新的仓库，
+也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。
+现在，我们根据GitHub的提示，在本地的learngit仓库下运行命令：
+$ git remote add origin git@github.com:michaelliao/learngit.git
+
+你也许还注意到，GitHub给出的地址不止一个，还可以用https://github.com/xmm1981/learnGit.git
+这样的地址。实际上，Git支持多种协议，默认的git://使用ssh，但也可以使用https等其他协议。
+使用https除了速度慢以外，还有个最大的麻烦是每次推送都必须输入口令，但是在某些只开放http端口的公司内部'
+就无法使用ssh协议而只能用https'
+====================================================================================================
+
+要关联一个远程库，使用命令git remote add origin git@server-name:path/repo-name.git；
+关联后，使用命令git push -u origin master第一次推送master分支的所有内容；
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+分布式版本系统的最大好处之一是在本地工作完全不需要考虑远程库的存在，也就是有没有联网都可以正常工作，
+而SVN在没有联网的时候是拒绝干活的！当有网络的时候，再把本地提交推送一下就完成了同步，真是太方便了！
+====================================================================================================
+Git鼓励大量使用分支：
+查看分支：git branch
+创建分支：git branch <name>
+切换分支：git checkout <name>
+创建+切换分支：git checkout -b <name>
+合并某分支到当前分支：git merge <name>
+删除分支：git branch -d <name>
+====================================================================================================
+Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作
+$ git stash
+Saved working directory and index state WIP on dev: 6224937 add merge
+HEAD is now at 6224937 add merge
+
+用git stash list命令看看
+$ git stash list
+stash@{0}: WIP on dev: 6224937 add merge
+工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+另一种方式是用git stash pop，恢复的同时把stash内容也删了：
+
+你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，
+用命令
+$ git stash apply stash@{0}
+
+修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；
+当手头工作没有完成时，先把工作现场git stash一下，然后去修复bug，修复后，再git stash pop，回到工作现场。
+====================================================================================================
+开发一个新feature，最好新建一个分支；
+如果要丢弃一个没有被合并过的分支，可以通过git branch -D <name>强行删除。
+====================================================================================================
+多人协作的工作模式，一旦熟悉了，就非常简单
+小结
+查看远程库信息，使用git remote -v；
+本地新建的分支如果不推送到远程，对其他人就是不可见的；
+从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+====================================================================================================
+创建标签
+发布一个版本时，我们通常先在版本库中打一个标签（tag），这样，就唯一确定了打标签时刻的版本。
+将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。
+所以，标签也是版本库的一个快照。
+Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针
+（跟分支很像对不对？但是分支可以移动，标签不能移动），所以，创建和删除标签都是瞬间完成的。
+命令git tag <name>用于新建一个标签，默认为HEAD，也可以指定一个commit id；
+git tag -a <tagname> -m "blablabla..."可以指定标签信息；
+git tag -s <tagname> -m "blablabla..."可以用PGP签名标签；
+命令git tag可以查看所有标签。
+====================================================================================================
+操作标签
+命令git push origin <tagname>可以推送一个本地标签；
+命令git push origin --tags可以推送全部未推送过的本地标签；
+命令git tag -d <tagname>可以删除一个本地标签；
+命令git push origin :refs/tags/<tagname>可以删除一个远程标签。
+$ git push origin :refs/tags/v0.9
+====================================================================================================
+====================================================================================================
+使用GitHub
+
+我们一直用GitHub作为免费的远程仓库，如果是个人的开源项目，放到GitHub上是完全没有问题的。
+其实GitHub还是一个开源协作社区，通过GitHub，既可以让别人参与你的开源项目，也可以参与别人的开源项目。
+在GitHub出现以前，开源项目开源容易，但让广大人民群众参与进来比较困难，因为要参与，就要提交代码，
+而给每个想提交代码的群众都开一个账号那是不现实的，因此，群众也仅限于报个bug，即使能改掉bug，
+也只能把diff文件用邮件发过去，很不方便。
+但是在GitHub上，利用Git极其强大的克隆和分支功能，广大人民群众真正可以第一次自由参与各种开源项目了。
+如何参与一个开源项目呢？比如人气极高的bootstrap项目，这是一个非常强大的CSS框架，你可以访问它的
+项目主页https://github.com/twbs/bootstrap，点“Fork”就在自己的账号下克隆了一个bootstrap仓库，然后，
+从自己的账号下clone：
+git clone git@github.com:michaelliao/bootstrap.git
+一定要从自己的账号下clone仓库，这样你才能推送修改。如果从bootstrap的作者的仓库地址
+git@github.com:twbs/bootstrap.git克隆，因为没有权限，你将不能推送修改。
+Bootstrap的官方仓库twbs/bootstrap、你在GitHub上克隆的仓库my/bootstrap，以及你自己克隆到本地电脑的仓库，
+他们的关系就像下图显示的那样：
+github-repos
+如果你想修复bootstrap的一个bug，或者新增一个功能，立刻就可以开始干活，干完后，往自己的仓库推送。
+如果你希望bootstrap的官方库能接受你的修改，你就可以在GitHub上发起一个pull request。当然，
+对方是否接受你的pull request就不一定了。
+====================================================================================================
+====================================================================================================
+====================================================================================================
+使用码云
+阅读: 13903
+使用GitHub时，国内的用户经常遇到的问题是访问速度太慢，有时候还会出现无法连接的情况（原因你懂的）。
+
+如果我们希望体验Git飞一般的速度，可以使用国内的Git托管服务——码云（gitee.com）。
+
+和GitHub相比，码云也提供免费的Git仓库。此外，还集成了代码质量检测、项目演示等功能。对于团队协作开发，码云还提供了项目管理、代码托管、文档管理的服务，5人以下小团队免费。
+
+ 码云的免费版本也提供私有库功能，只是有5人的成员上限。
+使用码云和使用GitHub类似，我们在码云上注册账号并登录后，需要先上传自己的SSH公钥。选择右上角用户头像 -> 菜单“修改资料”，然后选择“SSH公钥”，填写一个便于识别的标题，然后把用户主目录下的.ssh/id_rsa.pub文件的内容粘贴进去：
+
+gitee-add-ssh-key
+
+点击“确定”即可完成并看到刚才添加的Key：
+
+gitee-key
+
+如果我们已经有了一个本地的git仓库（例如，一个名为learngit的本地库），如何把它关联到码云的远程库上呢？
+
+首先，我们在码云上创建一个新的项目，选择右上角用户头像 -> 菜单“控制面板”，然后点击“创建项目”：
+
+gitee-new-repo
+
+项目名称最好与本地库保持一致：
+
+然后，我们在本地库上使用命令git remote add把它和码云的远程库关联：
+
+git remote add origin git@gitee.com:liaoxuefeng/learngit.git
+之后，就可以正常地用git push和git pull推送了！
+
+如果在使用命令git remote add时报错：
+
+git remote add origin git@gitee.com:liaoxuefeng/learngit.git
+fatal: remote origin already exists.
+这说明本地库已经关联了一个名叫origin的远程库，此时，可以先用git remote -v查看远程库信息：
+
+git remote -v
+origin    git@github.com:michaelliao/learngit.git (fetch)
+origin    git@github.com:michaelliao/learngit.git (push)
+可以看到，本地库已经关联了origin的远程库，并且，该远程库指向GitHub。
+
+我们可以删除已有的GitHub远程库：
+
+git remote rm origin
+再关联码云的远程库（注意路径中需要填写正确的用户名）：
+
+git remote add origin git@gitee.com:liaoxuefeng/learngit.git
+此时，我们再查看远程库信息：
+
+git remote -v
+origin    git@gitee.com:liaoxuefeng/learngit.git (fetch)
+origin    git@gitee.com:liaoxuefeng/learngit.git (push)
+现在可以看到，origin已经被关联到码云的远程库了。通过git push命令就可以把本地库推送到Gitee上。
+
+有的小伙伴又要问了，一个本地库能不能既关联GitHub，又关联码云呢？
+
+答案是肯定的，因为git本身是分布式版本控制系统，可以同步到另外一个远程库，当然也可以同步到另外两个远程库。
+
+使用多个远程库时，我们要注意，git给远程库起的默认名称是origin，如果有多个远程库，我们需要用不同的名称来标识不同的远程库。
+
+仍然以learngit本地库为例，我们先删除已关联的名为origin的远程库：
+
+git remote rm origin
+然后，先关联GitHub的远程库：
+
+git remote add github git@github.com:michaelliao/learngit.git
+注意，远程库的名称叫github，不叫origin了。
+
+接着，再关联码云的远程库：
+
+git remote add gitee git@gitee.com:liaoxuefeng/learngit.git
+同样注意，远程库的名称叫gitee，不叫origin。
+
+现在，我们用git remote -v查看远程库信息，可以看到两个远程库：
+
+git remote -v
+gitee    git@gitee.com:liaoxuefeng/learngit.git (fetch)
+gitee    git@gitee.com:liaoxuefeng/learngit.git (push)
+github    git@github.com:michaelliao/learngit.git (fetch)
+github    git@github.com:michaelliao/learngit.git (push)
+如果要推送到GitHub，使用命令：
+
+git push github master
+如果要推送到码云，使用命令：
+
+git push gitee master
+这样一来，我们的本地库就可以同时与多个远程库互相同步：
+
+┌─────────┐ ┌─────────┐
+│ GitHub  │ │  Gitee  │
+└─────────┘ └─────────┘
+     ▲           ▲
+     └─────┬─────┘
+           │
+    ┌─────────────┐
+    │ Local Repo  │
+    └─────────────┘
+====================================================================================================
+====================================================================================================
