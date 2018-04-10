@@ -1,6 +1,26 @@
 sudo apt-get install git
 安装起来：）
 ====================================================================================================
+Quick setup — if you’ve done this kind of thing before
+or	
+HTTPS
+SSH
+
+git@github.com:xmm1981/awesome-python3-webapp.git
+We recommend every repository include a README, LICENSE, and .gitignore.
+
+…or create a new repository on the command line
+echo "# awesome-python3-webapp" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.com:xmm1981/awesome-python3-webapp.git
+git push -u origin master
+…or push an existing repository from the command line
+git remote add origin git@github.com:xmm1981/awesome-python3-webapp.git
+git push -u origin maste
+====================================================================================================
+
 撤销修改
 场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
 场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，
